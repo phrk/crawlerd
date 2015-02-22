@@ -43,7 +43,8 @@ namespace crw {
 	
 	void Crawlerd::onPage(PagePtr _page) {
 		
-		std::cout << "Crawlerd::onPage " << _page->link.url << std::endl;
+		std::cout << "Crawlerd::onPage " << _page->link.url << std::endl
+			<< "links: " << _page->outbound_links_in.size() << std::endl;
 		
 		auto dit = m_domains.find(_page->link.domain);
 		
@@ -52,11 +53,13 @@ namespace crw {
 			return;
 		}
 		
-		if (!_page->success)
+		if (!_page->success) {
 			dit->second.downloadFailed(_page->link);
-		else
-			dit->second.downloadSucceded(_page->link);
-		
+			return;
+		}
+			
+		dit->second.downloadSucceded(_page->link);
+		dit->second.addNewInternalLinks(_page->outbound_links_in);
 		m_storage->savePage(_page);
 	}
 	
@@ -95,13 +98,13 @@ namespace crw {
 		
 		DomainLimits def_domain_limits;
 		def_domain_limits.max_parallel = 1;
-		def_domain_limits.max_minute = 10;
-		def_domain_limits.max_hour = 200;
-		def_domain_limits.max_all = 2000;
+		def_domain_limits.max_minute = 30;
+		def_domain_limits.max_hour = 1000;
+		def_domain_limits.max_all = 3000;
 		
 		m_crawler.reset(new Crawler(def_domain_limits, boost::bind(&Crawlerd::onPage, this, _1)));
 		
-		//m_storage->getDomainsLinks(m_domains);
+		m_storage->getDomainsLinks(m_domains);
 		
 		if (m_domains.size() == 0)
 			loadInitialLinks();

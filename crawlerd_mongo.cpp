@@ -12,6 +12,89 @@ namespace crw {
 
 	void CrawlerdMongo::getDomainsLinks(std::map<Domain, DomainLinks> &_domains) {
 		
+		std::auto_ptr<mongo::DBClientCursor> cursor = m_c.query(m_domains_ns, "{}");
+		
+		while (cursor->more()) {
+		//   cout << cursor->next().toString() << endl;
+			
+			try {
+			
+				mongo::BSONObj obj = cursor->next();
+				mongo::BSONElement bdomain = obj.getField("domain");
+				
+				DomainLinks domain_links( bdomain.str() );
+				
+				
+				{
+					mongo::BSONObj binteranal = obj.getField("internal_urls_inv").Obj();
+					if (!binteranal.couldBeArray()) {
+					
+						std::cout << "CrawlerdMongo::getDomainsLinks !binteranal.couldBeArray()\n";
+						continue;
+					}
+				
+					std::vector<mongo::BSONElement> v;
+					binteranal.elems(v);
+				
+					for (int i = 0; i<v.size(); i++) {
+						
+						//std::cout << "link: " << v[i].toString() << std::endl;
+					
+						try {
+							//std::string val;
+							//v[i].Val(val);
+							//std::cout << "adding link: " << v[i].str() << std::endl;
+							domain_links.addNewInternalLink( Link( v[i].str(), true) );
+						} catch (...) {
+							std::cout << "link constriction exception\n";
+							continue;
+						}
+						
+					}
+				}
+				
+				{
+					mongo::BSONObj bdownloaded_urls_inv = obj.getField("downloaded_urls_inv").Obj();
+					if (!bdownloaded_urls_inv.couldBeArray()) {
+					
+						std::cout << "CrawlerdMongo::getDomainsLinks !bdownloaded_urls_inv.couldBeArray()\n";
+						continue;
+					}
+				
+					std::vector<mongo::BSONElement> v;
+					bdownloaded_urls_inv.elems(v);
+				
+					for (int i = 0; i<v.size(); i++) {
+						
+						domain_links.addDownloadedLink( Link( v[i].str(), true) );
+					}
+				}
+			
+				{
+					mongo::BSONObj bfailed_urls_inv = obj.getField("failed_urls_inv").Obj();
+					if (!bfailed_urls_inv.couldBeArray()) {
+					
+						std::cout << "CrawlerdMongo::getDomainsLinks !bfailed_urls_inv.couldBeArray()\n";
+						continue;
+					}
+				
+					std::vector<mongo::BSONElement> v;
+					bfailed_urls_inv.elems(v);
+				
+					for (int i = 0; i<v.size(); i++) {
+						
+						domain_links.addDownloadedLink( Link( v[i].str(), true) );
+					}
+				}
+				
+				_domains.insert( make_pair(domain_links.domain, domain_links) );
+				std::cout << "CrawlerdMongo::getDomainsLinks reading domain: " << domain_links.domain << std::endl;
+			
+			} catch (...) {
+				
+				std::cout << "CrawlerdMongo::getDomainsLinks unknown exception\n";
+			}
+		}
 	}
 	
 	void CrawlerdMongo::saveDomainLinks(const DomainLinks &_domains) {

@@ -10,6 +10,8 @@ namespace crw {
 
 	void DomainLinks::addNewInternalLink(const Link &_link) {
 	
+		//std::cout << "DomainLinks::addNewInternalLink " << _link.url << std::endl;
+	
 		if (m_internal_links.find( _link.url ) == m_internal_links.end()) {
 			m_internal_links.insert( std::make_pair( _link.url , _link ));
 			m_download_queue.push(_link);
