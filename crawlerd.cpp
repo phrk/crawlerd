@@ -57,10 +57,41 @@ namespace crw {
 		else
 			dit->second.downloadSucceded(_page->link);
 		
-		//m_storage->savePage(_page);
+		m_storage->savePage(_page);
+	}
+	
+	void Crawlerd::flushDomainsLinks() {
+		
+		std::cout << "Crawlerd::flushDomainsLinks size: " << m_domains.size() << std::endl;
+		
+		auto it = m_domains.begin();
+		auto end = m_domains.end();
+		
+		while (it != end) {
+			
+			try {
+				
+				m_storage->saveDomainLinks(it->second);
+			
+			} catch (...) {
+				
+				std::cout << "Crawlerd::flushDomainsLinks m_storage->saveDomainLinks exception\n";
+			}
+			it++;
+		}
 	}
 	
 	void Crawlerd::doStart() {
+		
+		mongo::client::initialize();
+		
+		m_storage.reset(new CrawlerdMongo("localhost", "local"));
+		
+		m_flush_data_task.reset(new hiaux::RegularTask (3, boost::bind(&Crawlerd::flushDomainsLinks, this)));
+		
+		//DomainLinks links("test.mediatoday.ru");
+		//links.addNewInternalLink(Link("http://test.mediatoday.ru/index.php"));
+		//m_storage->saveDomainLinks(links);
 		
 		DomainLimits def_domain_limits;
 		def_domain_limits.max_parallel = 1;
@@ -102,6 +133,7 @@ namespace crw {
 			}
 			
 			m_crawler->proceedEvents();
+			m_flush_data_task->checkRun();
 		}
 	}
 	

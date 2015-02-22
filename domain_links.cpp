@@ -3,7 +3,8 @@
 namespace crw {
 
 	DomainLinks::DomainLinks(const Domain &_domain):
-	domain(_domain) {
+	domain(_domain),
+	inverted_domain(invertDomain(_domain)) {
 		
 	}
 

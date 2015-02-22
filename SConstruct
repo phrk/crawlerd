@@ -29,7 +29,7 @@ b.addPath("/usr/local/include/")
 #b.connectLib(hicore_path+"thirdparty/http-parser/")
 
 b.addCCFlags(["-Wc++11-extensions", "-Wreturn-type", "-Wc++11-long-long"])
-b.addLinkFlags(["-L/usr/local/lib/"])
+b.addLinkFlags(["-L/usr/local/lib/", "-lmongoclient", "-lboost_system"])
 
 b.addCppGlob("*.cpp")
 

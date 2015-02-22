@@ -5,6 +5,7 @@
 #include "crawler/link.h"
 
 #include "hiaux/structs/hashtable.h"
+#include "hiaux/strings/string_utils.h"
 
 #include <boost/noncopyable.hpp>
 
@@ -17,15 +18,16 @@ namespace crw {
 
 	class DomainLinks  {
 	
+	public:
+	
 		hiaux::hashtable <Url, Link> m_internal_links;
 		hiaux::hashtable <Url, Link> m_downloaded_links;
 		hiaux::hashtable <Url, Link> m_failed_links;
 		
 		std::queue<Link> m_download_queue;
 		
-	public:
-	
 		Domain domain;
+		Domain inverted_domain;
 		
 		DomainLinks(const Domain &_domain);
 		
