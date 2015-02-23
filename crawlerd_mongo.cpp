@@ -157,8 +157,8 @@ namespace crw {
 	void CrawlerdMongo::savePage (PagePtr _page) {
 		
 		mongo::BSONObjBuilder b;
-		//b.append("domain", _domains.domain);
 		b.append("_id", _page->link.inverted_url);
+		b.append("domain", _page->link.domain);
 		//b.append("html", _page->content.html);
 		b.append("text", _page->content.text);
 		
