@@ -22,7 +22,10 @@ namespace crw {
 				if (urls[i].size() > 2) {
 			
 					Link link( urls[i] );
-				
+					
+					if (m_domains.find(link.domain) != m_domains.end())
+						continue;
+					
 					//std::cout << "link: " << link.url << " domain: " << link.domain << std::endl;
 				
 					DomainLinks d_links(link.domain);
@@ -90,7 +93,7 @@ namespace crw {
 		
 		m_storage.reset(new CrawlerdMongo("localhost", "local"));
 		
-		m_flush_data_task.reset(new hiaux::RegularTask (3, boost::bind(&Crawlerd::flushDomainsLinks, this)));
+		m_flush_data_task.reset(new hiaux::RegularTask (30, boost::bind(&Crawlerd::flushDomainsLinks, this)));
 		
 		//DomainLinks links("test.mediatoday.ru");
 		//links.addNewInternalLink(Link("http://test.mediatoday.ru/index.php"));
@@ -100,14 +103,14 @@ namespace crw {
 		def_domain_limits.max_parallel = 1;
 		def_domain_limits.max_minute = 30;
 		def_domain_limits.max_hour = 1000;
-		def_domain_limits.max_all = 3000;
+		def_domain_limits.max_all = 5000;
 		
 		m_crawler.reset(new Crawler(def_domain_limits, boost::bind(&Crawlerd::onPage, this, _1)));
 		
 		m_storage->getDomainsLinks(m_domains);
 		
-		if (m_domains.size() == 0)
-			loadInitialLinks();
+		//if (m_domains.size() == 0)
+		loadInitialLinks();
 		
 		for (;;) {
 			
@@ -129,7 +132,7 @@ namespace crw {
 				} catch (...) {
 					
 					// specify which
-					std::cout << "Crawlerd::doStart: enqueue link exception \n";
+					// std::cout << "Crawlerd::doStart: enqueue link exception \n";
 				}
 				
 				dit++;

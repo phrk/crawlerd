@@ -159,7 +159,7 @@ namespace crw {
 		mongo::BSONObjBuilder b;
 		//b.append("domain", _domains.domain);
 		b.append("_id", _page->link.inverted_url);
-		b.append("html", _page->content.html);
+		//b.append("html", _page->content.html);
 		b.append("text", _page->content.text);
 		
 		std::string query = "{\"_id\":\"";
